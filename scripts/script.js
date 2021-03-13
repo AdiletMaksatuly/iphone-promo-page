@@ -201,6 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderCrossSell = () => {
     const crossSellList = document.querySelector('.cross-sell__list');
+    const crossSellAdd = document.querySelector('.cross-sell__add');
+    const allGoods = [];
+    const GOODS_ROW_AMOUNT = 4;
+
+    const shuffle = arr => arr.sort(() => Math.random() - 0.5);
 
     const createCrossSellItem = (good) => {
       const li = document.createElement('li');
@@ -216,27 +221,34 @@ document.addEventListener("DOMContentLoaded", () => {
       return li;
     }
 
-    const getRandomNum = (max) => {
-      return Math.floor(Math.random() * (max - 1));
+
+    let howManyTimesToCallRender = 0;
+
+    const renderCrossSellItems = arr => {
+      arr.forEach(item => {
+        crossSellList.append(createCrossSellItem(item));
+      });
+
+      howManyTimesToCallRender--;
     }
 
-    const createCrossSellList = (goods) => {
-      const randomList = [];
+    const createCrossSellList = (goods = []) => {
+      howManyTimesToCallRender = (goods.length / GOODS_ROW_AMOUNT).toFixed();
 
-      for (let i = 0; i < 4; i++) {
-        let num = 0;
-        do {
-          num = getRandomNum(13);
-        } while (randomList.includes(num));
+      allGoods.push(...shuffle(goods));
+      const fourShuffledGoods = allGoods.splice(0, GOODS_ROW_AMOUNT);
+      renderCrossSellItems(fourShuffledGoods);
+    };
 
-        randomList[i] = num;
+    const crossSellAddHandler = () => {
+      if (howManyTimesToCallRender === 0) {
+        crossSellAdd.remove();
+        crossSellAdd.removeEventListener('click', crossSellAddHandler);
       }
 
-      goods.filter((item, i) => randomList.includes(i)).forEach(item => {
-        const li = createCrossSellItem(item);
-        crossSellList.append(li);
-      })
-    };
+      renderCrossSellItems(allGoods.splice(0, GOODS_ROW_AMOUNT));
+    }
+    crossSellAdd.addEventListener('click', crossSellAddHandler);
 
     getData('cross-sell-dbase/dbase.json', createCrossSellList);
   }
@@ -245,4 +257,5 @@ document.addEventListener("DOMContentLoaded", () => {
   accordion();
   modal();
   renderCrossSell();
+  amenu('.header__menu', '.header-menu__list', '.header-menu__item', '.header-menu__burger');
 });
